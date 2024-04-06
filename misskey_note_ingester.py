@@ -39,6 +39,8 @@ class MisskeyNoteIngester:
         self.firehose_client = boto3.client("firehose", region_name=self.aws_region)
         self.firehose_stream = aws_firehose_stream_name
 
+        self.is_debug_mode = os.environ.get("DEBUG", "false")
+
     def connect(self):
         """
         Connects to the Misskey API WebSocket and starts listening for messages.
@@ -85,6 +87,10 @@ class MisskeyNoteIngester:
 
         """
         #print("OnMessage event has been triggered.")
+        if self.is_debug_mode == "true":
+            print(f"OnMessage: {message}")
+            return
+
         self.firehose_client.put_record(
             DeliveryStreamName=self.firehose_stream, Record={"Data": message}
         )
